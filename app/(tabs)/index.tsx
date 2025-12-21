@@ -1,98 +1,125 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+  FlatList,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import MasonryList from "@react-native-seoul/masonry-list";
+import { Image } from "expo-image";
+import { dummyPosts } from "@/data/posts";
+import { Ionicons } from "@expo/vector-icons";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const GAP = 12;
+const NUM_COLUMNS = 2;
+const IMAGE_WIDTH = (SCREEN_WIDTH - GAP * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
 
-export default function HomeScreen() {
+export default function FeedScreen() {
+  const filters = [
+    "All",
+    "road-trip",
+    "adventure",
+    "beach",
+    "city",
+    "hiking",
+    "food",
+    "wildlife",
+  ];
+
+  const [selectedFilter, setSelectedFilter] = useState("All");
+
+  const masonryPosts = dummyPosts.map((post, index) => ({
+    ...post,
+    coverImage: post.images[0],
+    height: 240 + (index % 3) * 80,
+  }));
+
+  const filteredImages =
+    selectedFilter === "All"
+      ? masonryPosts
+      : masonryPosts.filter((img) => img.category.includes(selectedFilter));
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaView className="flex-1 bg-black">
+      <View className="px-4">
+        {/* Search bar */}
+        <View>
+          <View className="mt-4 mb-2 px-4 py-2 bg-zinc-800 rounded-full flex-row items-center gap-3">
+            <Ionicons name="search" size={20} color="#9ca3af" onPress={() => console.log('searched')}/>
+            <Text className="text-zinc-400">Search</Text>
+          </View>
+          <TouchableOpacity className="absolute right-6 top-6" onPress={() => console.log('options pressed')}>
+            <Ionicons name="options" size={20} color="#9ca3af" />
+          </TouchableOpacity>
+        </View>
+        <FlatList
+          data={filters}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item}
+          contentContainerStyle={{ paddingVertical: 12 }}
+          renderItem={({ item }) => {
+            const isActive = item === selectedFilter;
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+            return (
+              <TouchableOpacity
+                onPress={() => setSelectedFilter(item)}
+                className={`px-4 py-2 mr-2 rounded-full ${
+                  isActive ? "bg-white" : "bg-zinc-800"
+                }`}
+              >
+                <Text
+                  className={`text-sm ${
+                    isActive ? "text-black" : "text-white"
+                  }`}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </View>
+
+      <View style={{ flex: 1, paddingHorizontal: GAP }}>
+        <MasonryList
+          data={filteredImages}
+          numColumns={NUM_COLUMNS}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 120 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              // onPress={() => console.log("Open post:", item.postId)}
+              style={{ marginBottom: GAP }}
+            >
+              <Image
+                source={{ uri: item.coverImage }}
+                contentFit="cover"
+                style={{
+                  width: IMAGE_WIDTH,
+                  height: item.height,
+                  borderRadius: 16,
+                }}
+              />
+
+              {/* 🔹 Title overlay */}
+              <View className="absolute bottom-2 left-2 right-2">
+                <Text
+                  numberOfLines={2}
+                  className="text-white text-sm font-semibold"
+                >
+                  {item.title}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
