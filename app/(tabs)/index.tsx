@@ -1,23 +1,40 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Dimensions,
-  FlatList,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import MasonryList from "@react-native-seoul/masonry-list";
 import { Image } from "expo-image";
-import { dummyPosts } from "@/data/posts";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import {
+  Dimensions,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { usePostContext } from "@/contexts/PostContext";
+import { router } from "expo-router";
+
+type MasonryPost = Post & {
+  coverImage: string;
+  height: number;
+};
+
+interface Post {
+  id: string;
+  title: string;
+  description: string;
+  images: string[];
+  category: string[];
+}
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const GAP = 12;
 const NUM_COLUMNS = 2;
 const IMAGE_WIDTH = (SCREEN_WIDTH - GAP * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
 
+
 export default function FeedScreen() {
+  const {posts} = usePostContext();
+  
   const filters = [
     "All",
     "road-trip",
@@ -31,16 +48,21 @@ export default function FeedScreen() {
 
   const [selectedFilter, setSelectedFilter] = useState("All");
 
-  const masonryPosts = dummyPosts.map((post, index) => ({
+  const masonryPosts: MasonryPost[] = posts.map((post, index) => ({
     ...post,
     coverImage: post.images[0],
     height: 240 + (index % 3) * 80,
   }));
 
-  const filteredImages =
+  const filteredImages: MasonryPost[] =
     selectedFilter === "All"
       ? masonryPosts
       : masonryPosts.filter((img) => img.category.includes(selectedFilter));
+  
+  const handlePostPress = (postId: string) => {
+    // console.log("Open post:", postId);
+    router.push(`/postDetailScreen?id=${postId}`);
+  }  
 
   return (
     <SafeAreaView className="flex-1 bg-black">
@@ -91,10 +113,10 @@ export default function FeedScreen() {
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 120 }}
-          renderItem={({ item }) => (
+          renderItem={({ item }: any) => (
             <TouchableOpacity
-              activeOpacity={0.9}
-              // onPress={() => console.log("Open post:", item.postId)}
+              activeOpacity={0.9} 
+              onPress={() => handlePostPress(item.id)}
               style={{ marginBottom: GAP }}
             >
               <Image

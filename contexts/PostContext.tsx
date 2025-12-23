@@ -1,13 +1,15 @@
-export interface Post {
-  id: string;
-  title: string;
-  description: string;
-  images: string[];
-  category: string[];
+import React, { createContext, useContext, ReactNode } from 'react'; 
+import {PostContextType } from '@/types/post';
+
+interface ImageProviderProps {
+  children: ReactNode;
 }
 
-export const dummyPosts: Post[] = [
-  {
+const PostContext = createContext<PostContextType | undefined>(undefined);
+
+export const PostProvider = ({children}: ImageProviderProps) => {
+    const posts = [
+        {
     id: '1',
     title: 'Epic Road Trip Across Australia',
     description: 'Just completed the most incredible 30-day road trip from Sydney to Perth! The outback views, wildlife encounters, and hidden beaches were absolutely breathtaking.',
@@ -267,4 +269,21 @@ export const dummyPosts: Post[] = [
     ],
     category: ['national-park', 'hiking', 'waterfalls', 'lookout']
   }
-];
+    ];
+
+    const value = { posts };
+
+    return (
+        <PostContext.Provider value={value}>
+            {children}
+        </PostContext.Provider>
+    );
+};
+
+export const usePostContext = () => {
+    const context = useContext(PostContext);
+    if (!context) {
+        throw new Error('usePostContext must be used within an PostProvider');
+    }
+    return context;
+};
