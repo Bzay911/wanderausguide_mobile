@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Fontisto from '@expo/vector-icons/Fontisto';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -17,33 +18,36 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarStyle:{
+          backgroundColor: "#000"
+        }
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Feed',
-          tabBarIcon: ({ color }) => <MaterialIcons name="dashboard" size={20} color={color} />,
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused? "grid" : "grid-outline"} size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="planScreen"
         options={{
           title: 'Plan',
-          tabBarIcon: ({ color }) => <FontAwesome6 size={20} name="suitcase-rolling" color={color} />,
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused? "calendar" : "calendar-outline"} size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="saveScreen"
         options={{
           title: 'Saved',
-          tabBarIcon: ({ color }) => <Fontisto size={20} name="favorite" color={color} />,
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused? "bookmark" : "bookmark-outline"} size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profileScreen"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <FontAwesome6 size={20} name="user" color={color} />,
+          tabBarIcon: ({focused, color }) => <Ionicons name={focused? "person" : "person-outline"} size={20} color={color} />,
         }}
       />
     </Tabs>

@@ -19,8 +19,8 @@ type MasonryPost = Post & {
 };
 
 interface Post {
-  id: string;
-  title: string;
+  _id: string;
+  placeName: string;
   description: string;
   images: string[];
   category: string[];
@@ -31,10 +31,9 @@ const GAP = 12;
 const NUM_COLUMNS = 2;
 const IMAGE_WIDTH = (SCREEN_WIDTH - GAP * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
 
-
 export default function FeedScreen() {
-  const {posts} = usePostContext();
-  
+  const { backendPosts } = usePostContext();
+
   const filters = [
     "All",
     "road-trip",
@@ -48,21 +47,22 @@ export default function FeedScreen() {
 
   const [selectedFilter, setSelectedFilter] = useState("All");
 
-  const masonryPosts: MasonryPost[] = posts.map((post, index) => ({
-    ...post,
-    coverImage: post.images[0],
-    height: 240 + (index % 3) * 80,
-  }));
+  const masonryPosts: MasonryPost[] = backendPosts
+    .filter((post) => post.images?.length > 0) // 🔐 safety
+    .map((post, index) => ({
+      ...post,
+      coverImage: post.images[0],
+      height: 240 + (index % 3) * 80,
+    }));
 
   const filteredImages: MasonryPost[] =
     selectedFilter === "All"
       ? masonryPosts
       : masonryPosts.filter((img) => img.category.includes(selectedFilter));
-  
+
   const handlePostPress = (postId: string) => {
-    // console.log("Open post:", postId);
-    router.push(`/postDetailScreen?id=${postId}`);
-  }  
+    router.push(`/posts/${postId}`);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-black">
@@ -70,10 +70,20 @@ export default function FeedScreen() {
         {/* Search bar */}
         <View>
           <View className="mt-4 mb-2 px-4 py-2 bg-zinc-800 rounded-full flex-row items-center gap-3">
-            <Ionicons name="search" size={20} color="#9ca3af" onPress={() => console.log('searched')}/>
-            <Text className="text-zinc-400">Search</Text>
+            <Ionicons
+              name="search"
+              size={20}
+              color="#9ca3af"
+              onPress={() => console.log("searched")}
+            />
+            <Text className="text-zinc-400 font-inter-regular text-sm">
+              Search
+            </Text>
           </View>
-          <TouchableOpacity className="absolute right-6 top-6" onPress={() => console.log('options pressed')}>
+          <TouchableOpacity
+            className="absolute right-6 top-6"
+            onPress={() => console.log("options pressed")}
+          >
             <Ionicons name="options" size={20} color="#9ca3af" />
           </TouchableOpacity>
         </View>
@@ -94,7 +104,7 @@ export default function FeedScreen() {
                 }`}
               >
                 <Text
-                  className={`text-sm ${
+                  className={`text-sm font-inter-regular ${
                     isActive ? "text-black" : "text-white"
                   }`}
                 >
@@ -115,8 +125,8 @@ export default function FeedScreen() {
           contentContainerStyle={{ paddingBottom: 120 }}
           renderItem={({ item }: any) => (
             <TouchableOpacity
-              activeOpacity={0.9} 
-              onPress={() => handlePostPress(item.id)}
+              activeOpacity={0.9}
+              onPress={() => handlePostPress(item._id)}
               style={{ marginBottom: GAP }}
             >
               <Image
@@ -135,7 +145,7 @@ export default function FeedScreen() {
                   numberOfLines={2}
                   className="text-white text-sm font-semibold"
                 >
-                  {item.title}
+                  {item.placeName}
                 </Text>
               </View>
             </TouchableOpacity>

@@ -42,13 +42,10 @@ export default function RootLayout() {
       <PostProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(protected)" options={{ headerShown: false }} />
           <Stack.Screen
             name="modal"
             options={{ presentation: "modal", title: "Modal" }}
-          />
-          <Stack.Screen
-            name="postDetailScreen"
-            options={{ title: "", headerShown: false }}
           />
         </Stack>
         <StatusBar style="light" />

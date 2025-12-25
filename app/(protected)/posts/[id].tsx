@@ -1,20 +1,39 @@
 import { Text, View, ScrollView, Dimensions } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { usePostContext } from "../contexts/PostContext";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { API } from "@/config/api";
+import { Post } from "@/types/post";
 
-export default function PostDetail() {
+export default function PostDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { posts } = usePostContext();
   const router = useRouter();
   const { width, height } = Dimensions.get("window");
   const [activeIndex, setActiveIndex] = useState(0);
+const [postDetails, setPostDetails] = useState<Post | null>(null);
 
-  const post = posts.find((p) => p.id === id);
-  if (!post) return null;
+
+  useEffect(() => {
+    const fetchPostById = async (id: string) => {
+      try {
+        const response = await fetch(`${API.BASE_URL}/api/imagekit/post/${id}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch post by id");
+        }
+        const data = await response.json();
+        setPostDetails(data.postDetails);
+      } catch (err) {
+        console.log("Error fetching posts", err);
+      }
+    };
+
+    fetchPostById(id);
+  }, []);
+
+  console.log("postdetails", postDetails);
 
   // Calculate dynamic image height (75% of screen height)
   const imageHeight = height * 0.75;
@@ -47,32 +66,33 @@ export default function PostDetail() {
           onScroll={handleScroll}
           scrollEventThrottle={16}
         >
-          {post.images.map((image, index) => (
-            <Image
-              key={index}
-              source={image}
-              style={{
-                width,
-                height: imageHeight,
-              }}
-              contentFit="cover"
-            />
-          ))}
+          {postDetails &&
+            postDetails.images.map((image, index) => (
+              <Image
+                key={index}
+                source={image}
+                style={{
+                  width,
+                  height: imageHeight,
+                }}
+                contentFit="cover"
+              />
+            ))}
         </ScrollView>
 
         {/* Image Counter Badge */}
-        {post.images.length > 1 && (
+        {postDetails && postDetails.images.length > 1 && (
           <View className="absolute top-4 right-4 bg-black/60 px-3 py-1 rounded-full">
             <Text className="text-white text-sm font-semibold">
-              {activeIndex + 1} / {post.images.length}
+              {activeIndex + 1} / {postDetails.images.length}
             </Text>
           </View>
         )}
 
         {/* Dot Indicators */}
-        {post.images.length > 1 && (
+        {postDetails && postDetails.images.length > 1 && (
           <View className="absolute bottom-4 left-0 right-0 flex-row justify-center gap-2">
-            {post.images.map((_, index) => (
+            {postDetails.images.map((_, index) => (
               <View
                 key={index}
                 className={`h-2 w-2 rounded-full ${
@@ -86,8 +106,12 @@ export default function PostDetail() {
 
       {/* Text content */}
       <View className="px-4 mt-4 flex-1">
-        <Text className="text-white text-lg font-inter-medium">{post.title}</Text>
-        <Text className="text-gray-300 text-sm mb-4 font-inter-regular mt-2">{post.description}</Text>
+        <Text className="text-white text-lg font-inter-medium">
+          {postDetails?.placeName}
+        </Text>
+        <Text className="text-gray-300 text-sm mb-4 font-inter-regular mt-2">
+          {postDetails?.description}
+        </Text>
       </View>
     </SafeAreaView>
   );
