@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "wanderausguide",
+    "slug": "wanderausguide",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/wanderausLogo.png",
+    "scheme": "wanderausguide",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/wanderausLogo.png",
+        "backgroundImage": "./assets/images/wanderausLogo.png",
+        "monochromeImage": "./assets/images/wanderausLogo.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/wanderausLogo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
